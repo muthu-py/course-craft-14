@@ -56,18 +56,20 @@ export const SignupForm: React.FC = () => {
 
     setIsLoading(true);
     try {
-      await signup(formData.email, formData.password, formData.name, formData.role as UserRole);
+      const user = await signup(formData.email, formData.password, formData.name, formData.role as UserRole);
       toast({
         title: "Account created successfully!",
         description: "Welcome to CourseCraft. You can now start learning.",
       });
       
-      // Redirect based on role
-      navigate(`/${formData.role}`);
+      // Redirect based on returned role
+      if (user?.role === 'admin') navigate('/admin');
+      else if (user?.role === 'teacher') navigate('/teacher');
+      else navigate('/student');
     } catch (error) {
       toast({
         title: "Signup failed",
-        description: "Something went wrong. Please try again.",
+        description: (error as Error)?.message || "Something went wrong. Please try again.",
         variant: "destructive",
       });
     } finally {

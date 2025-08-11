@@ -18,10 +18,12 @@ import { errorHandler, notFound } from './middlewares/error.js';
 // Import routes
 import authRoutes from './routes/auth.routes.js';
 import courseRoutes from './routes/course.routes.js';
-import teacherRoutes from './routes/teacher.routes.js';
-import studentRoutes from './routes/student.routes.js';
-import adminRoutes from './routes/admin.routes.js';
-import uploadRoutes from './routes/upload.routes.js';
+// Note: The following route files are not present in the repo snapshot.
+// If/when you add them, re-enable these imports and mounts.
+// import teacherRoutes from './routes/teacher.routes.js';
+// import studentRoutes from './routes/student.routes.js';
+// import adminRoutes from './routes/admin.routes.js';
+// import uploadRoutes from './routes/upload.routes.js';
 
 const app = express();
 
@@ -75,10 +77,10 @@ app.get('/health', (req, res) => {
 // API routes
 app.use('/api/v1/auth', authRoutes);
 app.use('/api/v1/courses', courseRoutes);
-app.use('/api/v1/teacher', teacherRoutes);
-app.use('/api/v1/student', studentRoutes);
-app.use('/api/v1/admin', adminRoutes);
-app.use('/api/v1/upload', uploadRoutes);
+// app.use('/api/v1/teacher', teacherRoutes);
+// app.use('/api/v1/student', studentRoutes);
+// app.use('/api/v1/admin', adminRoutes);
+// app.use('/api/v1/upload', uploadRoutes);
 
 // API documentation endpoint
 app.get('/api/v1/docs', (req, res) => {

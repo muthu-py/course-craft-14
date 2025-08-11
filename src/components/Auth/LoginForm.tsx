@@ -30,19 +30,19 @@ export const LoginForm: React.FC = () => {
 
     setIsLoading(true);
     try {
-      await login(email, password);
+      const user = await login(email, password);
       toast({
         title: "Welcome back!",
         description: "You have been successfully logged in.",
       });
-      
-      // Redirect based on role
-      const user = JSON.parse(localStorage.getItem('user') || '{}');
-      navigate(`/${user.role}`);
+      // Redirect based on role from successful login
+      if (user?.role === 'admin') navigate('/admin');
+      else if (user?.role === 'teacher') navigate('/teacher');
+      else navigate('/student');
     } catch (error) {
       toast({
         title: "Login failed",
-        description: "Invalid email or password. Please try again.",
+        description: (error as Error)?.message || "Invalid email or password. Please try again.",
         variant: "destructive",
       });
     } finally {

@@ -13,7 +13,7 @@ export const authenticateToken = async (req, res, next) => {
       });
     }
 
-    const decoded = jwt.verify(token, process.env.JWT_SECRET);
+    const decoded = jwt.verify(token, process.env.JWT_SECRET || 'devsecret');
     
     // Get user from database
     const user = await User.findById(decoded.userId).select('-password');
@@ -62,7 +62,7 @@ export const optionalAuth = async (req, res, next) => {
     const token = authHeader && authHeader.split(' ')[1];
 
     if (token) {
-      const decoded = jwt.verify(token, process.env.JWT_SECRET);
+      const decoded = jwt.verify(token, process.env.JWT_SECRET || 'devsecret');
       const user = await User.findById(decoded.userId).select('-password');
       if (user && user.isActive) {
         req.user = user;
@@ -79,7 +79,7 @@ export const optionalAuth = async (req, res, next) => {
 export const generateToken = (userId) => {
   return jwt.sign(
     { userId },
-    process.env.JWT_SECRET,
+    process.env.JWT_SECRET || 'devsecret',
     { expiresIn: process.env.JWT_EXPIRES_IN || '7d' }
   );
 };
@@ -87,7 +87,7 @@ export const generateToken = (userId) => {
 export const generateRefreshToken = (userId) => {
   return jwt.sign(
     { userId },
-    process.env.JWT_REFRESH_SECRET,
+    process.env.JWT_REFRESH_SECRET || 'devrefresh',
     { expiresIn: process.env.JWT_REFRESH_EXPIRES_IN || '30d' }
   );
 }; 

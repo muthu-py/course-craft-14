@@ -2,6 +2,8 @@ import User from '../models/User.js';
 import { generateToken, generateRefreshToken } from '../middlewares/auth.js';
 import { AppError } from '../middlewares/error.js';
 import { asyncHandler } from '../middlewares/error.js';
+import jwt from 'jsonwebtoken';
+import crypto from 'crypto';
 
 // @desc    Register user
 // @route   POST /api/v1/auth/register
@@ -48,9 +50,29 @@ export const register = asyncHandler(async (req, res) => {
 export const login = asyncHandler(async (req, res) => {
   const { email, password } = req.body;
 
+  // Debug logging
+  console.log('=== LOGIN ATTEMPT DEBUG ===');
+  console.log('Email received:', email);
+  console.log('Password received:', password);
+  console.log('Email type:', typeof email);
+  console.log('Password type:', typeof password);
+
   // Check if user exists and password is correct
   const user = await User.findByEmail(email).select('+password');
+  console.log('User found from MongoDB:', user ? 'YES' : 'NO');
+  if (user) {
+    console.log('User details from MongoDB:');
+    console.log('- User ID:', user._id);
+    console.log('- User email:', user.email);
+    console.log('- User role:', user.role);
+    console.log('- Stored password:', user.password);
+    console.log('- Stored password type:', typeof user.password);
+    console.log('- Password length:', user.password ? user.password.length : 'N/A');
+  }
+
   if (!user || !(await user.comparePassword(password))) {
+    console.log('Login failed - User not found or password mismatch');
+    console.log('Password comparison result:', user ? await user.comparePassword(password) : 'N/A');
     throw new AppError('Invalid email or password', 401);
   }
 
@@ -158,7 +180,7 @@ export const refreshToken = asyncHandler(async (req, res) => {
   }
 
   try {
-    const decoded = jwt.verify(refreshToken, process.env.JWT_REFRESH_SECRET);
+    const decoded = jwt.verify(refreshToken, process.env.JWT_REFRESH_SECRET || 'devrefresh');
     const user = await User.findById(decoded.userId);
 
     if (!user || !user.isActive) {

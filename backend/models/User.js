@@ -1,5 +1,4 @@
 import mongoose from 'mongoose';
-import bcrypt from 'bcryptjs';
 
 const userSchema = new mongoose.Schema({
   name: {
@@ -80,7 +79,9 @@ const userSchema = new mongoose.Schema({
   averageScore: {
     type: Number,
     default: 0
-  }
+  },
+  resetPasswordToken: { type: String },
+  resetPasswordExpire: { type: Date },
 }, {
   timestamps: true
 });
@@ -90,22 +91,19 @@ userSchema.index({ email: 1 });
 userSchema.index({ role: 1 });
 userSchema.index({ 'enrolledCourses.course': 1 });
 
-// Pre-save middleware to hash password
-userSchema.pre('save', async function(next) {
-  if (!this.isModified('password')) return next();
-  
-  try {
-    const salt = await bcrypt.genSalt(12);
-    this.password = await bcrypt.hash(this.password, salt);
-    next();
-  } catch (error) {
-    next(error);
-  }
-});
+// No password hashing (store and compare as plain text for this environment)
 
-// Method to compare password
+// Method to compare password (plain text)
 userSchema.methods.comparePassword = async function(candidatePassword) {
-  return await bcrypt.compare(candidatePassword, this.password);
+  console.log('=== comparePassword DEBUG ===');
+  console.log('Candidate password:', candidatePassword);
+  console.log('Stored password:', this.password);
+  console.log('Candidate password type:', typeof candidatePassword);
+  console.log('Stored password type:', typeof this.password);
+  console.log('Direct comparison (==):', candidatePassword == this.password);
+  console.log('Strict comparison (===):', candidatePassword === this.password);
+  
+  return candidatePassword == this.password;
 };
 
 // Method to get public profile (without sensitive data)
@@ -117,7 +115,15 @@ userSchema.methods.getPublicProfile = function() {
 
 // Static method to find by email
 userSchema.statics.findByEmail = function(email) {
-  return this.findOne({ email: email.toLowerCase() });
+  console.log('=== findByEmail DEBUG ===');
+  console.log('Searching for email:', email);
+  console.log('Email to lowercase:', email ? email.toLowerCase() : 'N/A');
+  console.log('Email type:', typeof email);
+  
+  const query = { email: email.toLowerCase() };
+  console.log('MongoDB query:', JSON.stringify(query));
+  
+  return this.findOne(query);
 };
 
 // Virtual for full name
